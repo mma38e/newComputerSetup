@@ -1,0 +1,77 @@
+---
+- name: Setup workstation
+  hosts: localhost
+  become: true
+
+  tasks:
+    - name: Install favorite packages
+      ansible.builtin.package:
+        name:
+          - git
+          - vim
+          - htop
+          - fish
+          - docker.io
+          - docker-compose
+          - python3-pip
+          - curl
+          - wireguard
+          - openresolv
+          - nload
+          - nmap
+          - gnome-tweaks
+          - terminator
+          - screen
+          - traceroute
+          - gparted
+          - nfs-common
+          - network-manager-l2tp-gnome
+          - lm-sensors
+          - iperf3
+          - exfat-utils
+          - exfat-fuse
+        state: present
+
+    - name: Install deb packages from the internet
+      ansible.builtin.apt:
+        deb: "{{item}}"
+      loop:
+        - https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        - https://downloads.exodus.com/releases/exodus-linux-x64-22.9.8.deb
+
+    - name: Add speedtest repo
+      ansible.builtin.command: curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | bash
+      ignore_errors: true
+
+    - name: Add speedtest package
+      ansible.builtin.package:
+        name: speedtest
+        state: present
+
+    - name: Install ansible python package
+      ansible.builtin.pip:
+        name:
+          - ansible
+          - ansible-lint
+
+    - name: Install snap packages
+      community.general.snap:
+        name:
+          - audacity
+          - code
+          - discord
+          - spotify
+          - vlc
+          - plex-desktop
+          
+    - name: setup sudoers file
+      community.general.sudoers:
+        name: Wireguard setup
+        state: present
+        user: michael
+        nopassword: true
+        commands:
+          - /usr/bin/wg-quick
+
+
+# sudo docker run -it --name samba -p 139:139 -p 445:445 --rm -v /home/michael/Downloads/:/mount -d dperson/samba -p -s "public;/mount" 
